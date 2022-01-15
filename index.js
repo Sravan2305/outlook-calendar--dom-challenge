@@ -2,16 +2,16 @@ import { nonConflict } from "./data.js";
 
 /////////DOM Elements /////////////////
 const containerEle = document.querySelector(".container");
-const timeEle = document.querySelector(".time");
-const lineEle = document.querySelector(".line");
+const timePadding = "3rem";
 
 for (let i = 0; i < 24; i++) {
   const div = document.createElement("div");
   const span = document.createElement("span");
   const line = document.createElement("div");
   div.classList.add("time-wrapper");
+  div.style.height = timePadding;
   span.classList.add("time");
-  line.classList.add(`line`, `line-${i}`);
+  line.classList.add(`line`);
   span.innerHTML =
     i === 12 ? `12:00 PM` : `${i % 12}:00 ${i >= 12 ? "PM" : "AM"}`;
   div.append(span, line);
@@ -30,12 +30,16 @@ function nonConflictMeetings(data) {
     extractTime(data.startTime) + " - " + extractTime(data.endTime);
   div.append(p1, p2);
   const height = Math.floor(
-    getTimeDifferenceInMinutes(data.startTime, data.endTime) * 0.5
+    getTimeDifferenceInMinutes(data.startTime, data.endTime)
   );
-  div.style.minHeight = height
-  const domNode = document.querySelector(`.line-${+(data.startTime.split(":")[0])}`)
-  domNode.appendChild(div)
-  console.log(domNode ,`line-${+(data.startTime.split(":")[0])}` )
+  div.style.height = (+height * +timePadding.split("rem")[0]) / 60 + "rem";
+
+  [...document.querySelectorAll(".time")].map((childNode, i) => {
+    if (extractTime(data.startTime) === childNode.innerHTML) {
+      const lineEle = childNode.nextSibling;
+      lineEle.appendChild(div);
+    }
+  });
 }
 
 function extractTime(time) {
@@ -54,5 +58,6 @@ function getTimeDifferenceInMinutes(start, end) {
   const endArr = end.split(":");
   return +endArr[0] * 60 + +endArr[1] - (+startArr[0] * 60 + +startArr[1]);
 }
-nonConflict.map(nonConflictMeetings)
+// nonConflict.map(nonConflictMeetings);
 // nonConflictMeetings(nonConflict[0]);
+nonConflict.map((data) => nonConflictMeetings(data));
